@@ -4,6 +4,8 @@ from collections import namedtuple
 from contextlib import contextmanager
 from os import PathLike
 from pathlib import Path
+from typing import Iterator
+from typing import Tuple
 from typing import Union
 from unittest import mock
 
@@ -12,6 +14,8 @@ from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import override_settings
 from django.test import TransactionTestCase
+from documents.data_models import ConsumeDocument
+from documents.data_models import DocumentOverrides
 
 
 def setup_directories():
@@ -116,6 +120,11 @@ class ConsumerProgressMixin:
 
 
 class DocumentConsumeDelayMixin:
+    """
+    Provides mocking of the consume_file asynchronous task and useful utilities
+    for decoding its arguments
+    """
+
     def setUp(self) -> None:
         self.consume_file_patcher = mock.patch("documents.tasks.consume_file.delay")
         self.consume_file_mock = self.consume_file_patcher.start()
@@ -124,6 +133,55 @@ class DocumentConsumeDelayMixin:
     def tearDown(self) -> None:
         super().tearDown()
         self.consume_file_patcher.stop()
+
+    def get_last_consume_delay_call_args(
+        self,
+    ) -> Tuple[ConsumeDocument, DocumentOverrides]:
+        """
+        Returns the most recent arguments to the async task
+        """
+        # Must be at least 1 call
+        self.consume_file_mock.assert_called()
+
+        args, _ = self.consume_file_mock.call_args
+        input_doc, overrides = args
+
+        input_doc: ConsumeDocument = ConsumeDocument.from_dict(input_doc)
+        overrides: DocumentOverrides = DocumentOverrides.from_dict(overrides)
+
+        return (input_doc, overrides)
+
+    def get_all_consume_delay_call_args(
+        self,
+    ) -> Iterator[Tuple[ConsumeDocument, DocumentOverrides]]:
+        """
+        Iterates over all calls to the async task and returns the arguments
+        """
+
+        for args, _ in self.consume_file_mock.call_args_list:
+            input_doc, overrides = args
+            input_doc: ConsumeDocument = ConsumeDocument.from_dict(input_doc)
+            overrides: DocumentOverrides = DocumentOverrides.from_dict(overrides)
+
+            yield (input_doc, overrides)
+
+    def get_specific_consume_delay_call_args(
+        self,
+        index: int,
+    ) -> Iterator[Tuple[ConsumeDocument, DocumentOverrides]]:
+        """
+        Returns the arguments of a specific call to the async task
+        """
+        # Must be at least 1 call
+        self.consume_file_mock.assert_called()
+
+        args, _ = self.consume_file_mock.call_args_list[index]
+        input_doc, overrides = args
+
+        input_doc: ConsumeDocument = ConsumeDocument.from_dict(input_doc)
+        overrides: DocumentOverrides = DocumentOverrides.from_dict(overrides)
+
+        return (input_doc, overrides)
 
 
 class TestMigrations(TransactionTestCase):
@@ -140,7 +198,7 @@ class TestMigrations(TransactionTestCase):
 
         assert (
             self.migrate_from and self.migrate_to
-        ), "TestCase '{}' must define migrate_from and migrate_to     properties".format(
+        ), "TestCase '{}' must define migrate_from and migrate_to properties".format(
             type(self).__name__,
         )
         self.migrate_from = [(self.app, self.migrate_from)]

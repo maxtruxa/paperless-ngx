@@ -5,12 +5,12 @@
     </svg>
     <div class="d-none d-sm-inline">&nbsp;{{title}}</div>
     <ng-container *ngIf="!editing && selectionModel.totalCount > 0">
-      <app-clearable-badge [number]="multiple ? selectionModel.totalCount : undefined" [selected]="!multiple && selectionModel.selectionSize() > 0" (cleared)="reset()"></app-clearable-badge>
+      <app-clearable-badge [number]="selectionModel.totalCount" [selected]="selectionModel.selectionSize() > 0" (cleared)="reset()"></app-clearable-badge>
     </ng-container>
   </button>
   <div class="dropdown-menu py-0 shadow" ngbDropdownMenu attr.aria-labelledby="dropdown{{title}}">
     <div class="list-group list-group-flush">
-      <div *ngIf="!editing && multiple" class="list-group-item d-flex">
+      <div *ngIf="!editing && manyToOne" class="list-group-item d-flex">
         <div class="btn-group btn-group-xs flex-fill">
           <input [(ngModel)]="selectionModel.logicalOperator" [disabled]="!operatorToggleEnabled" (ngModelChange)="selectionModel.toggleOperator()" type="radio" class="btn-check" id="logicalOperatorAnd" value="and">
           <label class="btn btn-outline-primary" for="logicalOperatorAnd" i18n>All</label>
@@ -34,7 +34,7 @@
           <use xlink:href="assets/bootstrap-icons.svg#arrow-right" />
         </svg>
       </button>
-      <div *ngIf="!editing && multiple" class="list-group-item list-group-item-note pt-1 pb-2">
+      <div *ngIf="!editing" class="list-group-item list-group-item-note pt-1 pb-2">
         <small i18n>Click again to exclude items.</small>
       </div>
     </div>

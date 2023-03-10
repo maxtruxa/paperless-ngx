@@ -18,12 +18,17 @@ export interface ChangedItems {
   itemsToRemove: MatchingModel[]
 }
 
+export enum LogicalOperator {
+  And = 'and',
+  Or = 'or',
+}
+
 export class FilterableDropdownSelectionModel {
   changed = new Subject<FilterableDropdownSelectionModel>()
 
-  multiple = false
-  private _logicalOperator = 'and'
-  temporaryLogicalOperator = this._logicalOperator
+  manyToOne = false
+  private _logicalOperator: LogicalOperator = LogicalOperator.And
+  temporaryLogicalOperator: LogicalOperator = this._logicalOperator
 
   items: MatchingModel[] = []
 
@@ -94,14 +99,6 @@ export class FilterableDropdownSelectionModel {
       this.temporarySelectionStates.delete(id)
     }
 
-    if (!this.multiple) {
-      for (let key of this.temporarySelectionStates.keys()) {
-        if (key != id) {
-          this.temporarySelectionStates.delete(key)
-        }
-      }
-    }
-
     if (!id) {
       for (let key of this.temporarySelectionStates.keys()) {
         if (key) {
@@ -119,19 +116,13 @@ export class FilterableDropdownSelectionModel {
 
   exclude(id: number, fireEvent: boolean = true) {
     let state = this.temporarySelectionStates.get(id)
-    if (state == null || state != ToggleableItemState.Excluded) {
+    if (id && (state == null || state != ToggleableItemState.Excluded)) {
       this.temporarySelectionStates.set(id, ToggleableItemState.Excluded)
-      this.temporaryLogicalOperator = this._logicalOperator = 'and'
-    } else if (state == ToggleableItemState.Excluded) {
+      this.temporaryLogicalOperator = this._logicalOperator = this.manyToOne
+        ? LogicalOperator.And
+        : LogicalOperator.Or
+    } else if (!id || state == ToggleableItemState.Excluded) {
       this.temporarySelectionStates.delete(id)
-    }
-
-    if (!this.multiple) {
-      for (let key of this.temporarySelectionStates.keys()) {
-        if (key != id) {
-          this.temporarySelectionStates.delete(key)
-        }
-      }
     }
 
     if (fireEvent) {
@@ -143,11 +134,11 @@ export class FilterableDropdownSelectionModel {
     return this.selectionStates.get(id) || ToggleableItemState.NotSelected
   }
 
-  get logicalOperator(): string {
+  get logicalOperator(): LogicalOperator {
     return this.temporaryLogicalOperator
   }
 
-  set logicalOperator(operator: string) {
+  set logicalOperator(operator: LogicalOperator) {
     this.temporaryLogicalOperator = operator
   }
 
@@ -171,7 +162,7 @@ export class FilterableDropdownSelectionModel {
 
   clear(fireEvent = true) {
     this.temporarySelectionStates.clear()
-    this.temporaryLogicalOperator = this._logicalOperator = 'and'
+    this.temporaryLogicalOperator = this._logicalOperator = LogicalOperator.And
     if (fireEvent) {
       this.changed.next(this)
     }
@@ -276,7 +267,7 @@ export class FilterableDropdownComponent {
     if (this.selectionModel) {
       this.selectionModel.changed.complete()
       model.items = this.selectionModel.items
-      model.multiple = this.selectionModel.multiple
+      model.manyToOne = this.selectionModel.manyToOne
     }
     model.changed.subscribe((updatedModel) => {
       this.selectionModelChange.next(updatedModel)
@@ -292,12 +283,12 @@ export class FilterableDropdownComponent {
   selectionModelChange = new EventEmitter<FilterableDropdownSelectionModel>()
 
   @Input()
-  set multiple(value: boolean) {
-    this.selectionModel.multiple = value
+  set manyToOne(manyToOne: boolean) {
+    this.selectionModel.manyToOne = manyToOne
   }
 
-  get multiple() {
-    return this.selectionModel.multiple
+  get manyToOne() {
+    return this.selectionModel.manyToOne
   }
 
   @Input()

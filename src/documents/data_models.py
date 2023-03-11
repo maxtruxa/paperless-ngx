@@ -12,7 +12,7 @@ from dateutil.parser import isoparse
 
 
 @dataclasses.dataclass
-class DocumentOverrides:
+class DocumentMetadataOverrides:
     """
     Manages overrides for document fields which normally would
     be set from content or matching.  All fields default to None,
@@ -41,18 +41,18 @@ class DocumentOverrides:
         }
 
     @staticmethod
-    def from_dict(data: Optional[Dict]) -> "DocumentOverrides":
+    def from_dict(data: Optional[Dict]) -> "DocumentMetadataOverrides":
         if data is None:
-            return DocumentOverrides()
-        return DocumentOverrides(
-            data["filename"],
-            data["title"],
-            data["correspondent_id"],
-            data["document_type_id"],
-            data["tag_ids"],
-            isoparse(data["created"]) if data["created"] else None,
-            data["archive_serial_num"],
-            data["owner_id"],
+            return DocumentMetadataOverrides()
+        return DocumentMetadataOverrides(
+            filename=data["filename"],
+            title=data["title"],
+            correspondent_id=data["correspondent_id"],
+            document_type_id=data["document_type_id"],
+            tag_ids=data["tag_ids"],
+            created=isoparse(data["created"]) if data["created"] else None,
+            asn=data["archive_serial_num"],
+            owner_id=data["owner_id"],
         )
 
 
@@ -61,13 +61,13 @@ class DocumentSource(enum.IntEnum):
     The source of an incoming document.  May have other uses in the future
     """
 
-    ConsumeFolder = enum.auto()
-    ApiUpload = enum.auto()
-    MailFetch = enum.auto()
+    CONSUME_FOLDER = enum.auto()
+    API_UPLOAD = enum.auto()
+    MAIl_FETCH = enum.auto()
 
 
 @dataclasses.dataclass
-class ConsumeDocument:
+class ConsumableDocument:
     """
     Encapsulates an incoming document, either from consume folder, API upload
     or mail fetching and certain useful operations on it.
@@ -111,15 +111,15 @@ class ConsumeDocument:
         }
 
     @staticmethod
-    def from_dict(data: Dict) -> "ConsumeDocument":
+    def from_dict(data: Dict) -> "ConsumableDocument":
         """
         Given a serialized dataclass, returns the
         """
-        doc = ConsumeDocument(
-            DocumentSource(data["source"]),
-            Path(data["original_file"]),
+        doc = ConsumableDocument(
+            source=DocumentSource(data["source"]),
+            original_file=Path(data["original_file"]),
             # The mime type is already determined in this case,
             # don't gather a second time
-            data["mime_type"],
+            mime_type=data["mime_type"],
         )
         return doc

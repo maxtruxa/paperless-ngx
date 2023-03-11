@@ -12,8 +12,8 @@ from unittest import mock
 from django.core.management import call_command
 from django.db import DatabaseError
 from django.test import TestCase
-from documents.data_models import ConsumeDocument
-from documents.data_models import DocumentOverrides
+from documents.data_models import ConsumableDocument
+from documents.data_models import DocumentMetadataOverrides
 from documents.models import Correspondent
 from documents.tests.utils import DirectoriesMixin
 from documents.tests.utils import DocumentConsumeDelayMixin
@@ -1104,8 +1104,10 @@ class TestMail(
                 expected_signatures,
             ):
                 input_doc, overrides = consume_task.args
-                input_doc: ConsumeDocument = ConsumeDocument.from_dict(input_doc)
-                overrides: DocumentOverrides = DocumentOverrides.from_dict(overrides)
+                input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
+                overrides: DocumentMetadataOverrides = (
+                    DocumentMetadataOverrides.from_dict(overrides)
+                )
 
                 # assert the file exists
                 self.assertIsFile(input_doc.original_file)

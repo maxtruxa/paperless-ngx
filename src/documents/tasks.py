@@ -20,8 +20,8 @@ from documents.classifier import DocumentClassifier
 from documents.classifier import load_classifier
 from documents.consumer import Consumer
 from documents.consumer import ConsumerError
-from documents.data_models import ConsumeDocument
-from documents.data_models import DocumentOverrides
+from documents.data_models import ConsumableDocument
+from documents.data_models import DocumentMetadataOverrides
 from documents.data_models import DocumentSource
 from documents.file_handling import create_source_path_directory
 from documents.file_handling import generate_unique_filename
@@ -94,8 +94,10 @@ def consume_file(
 ):
 
     # Deserialize from the basic types dict back to an object with nice types
-    input_doc: ConsumeDocument = ConsumeDocument.from_dict(input_doc)
-    overrides: DocumentOverrides = DocumentOverrides.from_dict(overrides)
+    input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
+    overrides: DocumentMetadataOverrides = DocumentMetadataOverrides.from_dict(
+        overrides,
+    )
 
     # read all barcodes in the current document
     if settings.CONSUMER_ENABLE_BARCODES or settings.CONSUMER_ENABLE_ASN_BARCODE:
@@ -123,7 +125,7 @@ def consume_file(
                     # Move it to consume directory to be picked up
                     # Otherwise, use the current parent to keep possible tags
                     # from subdirectories
-                    if input_doc.source != DocumentSource.ConsumeFolder:
+                    if input_doc.source != DocumentSource.CONSUME_FOLDER:
                         save_to_dir = settings.CONSUMPTION_DIR
                     else:
                         # Note this uses the original file, because it's in the

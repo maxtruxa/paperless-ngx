@@ -12,8 +12,8 @@ from django.core.management import CommandError
 from django.test import override_settings
 from django.test import TransactionTestCase
 from documents.consumer import ConsumerError
-from documents.data_models import ConsumeDocument
-from documents.data_models import DocumentOverrides
+from documents.data_models import ConsumableDocument
+from documents.data_models import DocumentMetadataOverrides
 from documents.management.commands import document_consumer
 from documents.models import Tag
 from documents.tests.utils import DirectoriesMixin
@@ -86,9 +86,11 @@ class ConsumerThreadMixin(DocumentConsumeDelayMixin):
         input_doc,
         overrides=None,
     ):
-        input_doc: ConsumeDocument = ConsumeDocument.from_dict(input_doc)
-        overrides: DocumentOverrides = (
-            DocumentOverrides.from_dict(overrides) if overrides else DocumentOverrides()
+        input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
+        overrides: DocumentMetadataOverrides = (
+            DocumentMetadataOverrides.from_dict(overrides)
+            if overrides
+            else DocumentMetadataOverrides()
         )
         eq = filecmp.cmp(input_doc.original_file, self.sample_file, shallow=False)
         if not eq:

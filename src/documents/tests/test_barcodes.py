@@ -9,8 +9,8 @@ from django.test import TestCase
 from documents import barcodes
 from documents import tasks
 from documents.consumer import ConsumerError
-from documents.data_models import ConsumeDocument
-from documents.data_models import DocumentOverrides
+from documents.data_models import ConsumableDocument
+from documents.data_models import DocumentMetadataOverrides
 from documents.data_models import DocumentSource
 from documents.tests.utils import DirectoriesMixin
 from documents.tests.utils import FileSystemAssertsMixin
@@ -636,8 +636,11 @@ class TestBarcode(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         with mock.patch("documents.tasks.async_to_sync"):
             self.assertEqual(
                 tasks.consume_file(
-                    ConsumeDocument(DocumentSource.ConsumeFolder, dst).as_dict(),
-                    DocumentOverrides().as_dict(),
+                    ConsumableDocument(
+                        source=DocumentSource.CONSUME_FOLDER,
+                        original_file=dst,
+                    ).as_dict(),
+                    None,
                 ),
                 "File successfully split",
             )
@@ -663,8 +666,11 @@ class TestBarcode(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         with mock.patch("documents.tasks.async_to_sync"):
             self.assertEqual(
                 tasks.consume_file(
-                    ConsumeDocument(DocumentSource.ConsumeFolder, dst).as_dict(),
-                    DocumentOverrides().as_dict(),
+                    ConsumableDocument(
+                        source=DocumentSource.CONSUME_FOLDER,
+                        original_file=dst,
+                    ).as_dict(),
+                    None,
                 ),
                 "File successfully split",
             )
@@ -694,8 +700,11 @@ class TestBarcode(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
             self.assertIn(
                 "Success",
                 tasks.consume_file(
-                    ConsumeDocument(DocumentSource.ConsumeFolder, dst).as_dict(),
-                    DocumentOverrides().as_dict(),
+                    ConsumableDocument(
+                        source=DocumentSource.CONSUME_FOLDER,
+                        original_file=dst,
+                    ).as_dict(),
+                    None,
                 ),
             )
 
@@ -736,8 +745,11 @@ class TestBarcode(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         with mock.patch("documents.tasks.async_to_sync"):
             self.assertEqual(
                 tasks.consume_file(
-                    ConsumeDocument(DocumentSource.ConsumeFolder, dst).as_dict(),
-                    DocumentOverrides().as_dict(),
+                    ConsumableDocument(
+                        source=DocumentSource.CONSUME_FOLDER,
+                        original_file=dst,
+                    ).as_dict(),
+                    None,
                 ),
                 "File successfully split",
             )
@@ -963,8 +975,11 @@ class TestAsnBarcode(DirectoriesMixin, TestCase):
 
         with mock.patch("documents.consumer.Consumer.try_consume_file") as mocked_call:
             tasks.consume_file(
-                ConsumeDocument(DocumentSource.ConsumeFolder, dst).as_dict(),
-                DocumentOverrides().as_dict(),
+                ConsumableDocument(
+                    source=DocumentSource.CONSUME_FOLDER,
+                    original_file=dst,
+                ).as_dict(),
+                None,
             )
 
             args, kwargs = mocked_call.call_args
@@ -1029,12 +1044,14 @@ class TestAsnBarcode(DirectoriesMixin, TestCase):
         dst = self.dirs.scratch_dir / "barcode-128-asn-too-large.pdf"
         shutil.copy(src, dst)
 
-        input_doc = ConsumeDocument(DocumentSource.ConsumeFolder, dst)
+        input_doc = ConsumableDocument(
+            source=DocumentSource.CONSUME_FOLDER,
+            original_file=dst,
+        )
 
         with mock.patch("documents.consumer.Consumer._send_progress"):
-            self.assertRaisesMessage(
+            with self.assertRaisesMessage(
                 ConsumerError,
                 "Given ASN 4294967296 is out of range [0, 4,294,967,295]",
-                tasks.consume_file,
-                input_doc.as_dict(),
-            )
+            ):
+                tasks.consume_file(input_doc.as_dict())

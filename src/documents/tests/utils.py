@@ -14,8 +14,8 @@ from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import override_settings
 from django.test import TransactionTestCase
-from documents.data_models import ConsumeDocument
-from documents.data_models import DocumentOverrides
+from documents.data_models import ConsumableDocument
+from documents.data_models import DocumentMetadataOverrides
 
 
 def setup_directories():
@@ -136,7 +136,7 @@ class DocumentConsumeDelayMixin:
 
     def get_last_consume_delay_call_args(
         self,
-    ) -> Tuple[ConsumeDocument, DocumentOverrides]:
+    ) -> Tuple[ConsumableDocument, DocumentMetadataOverrides]:
         """
         Returns the most recent arguments to the async task
         """
@@ -146,29 +146,33 @@ class DocumentConsumeDelayMixin:
         args, _ = self.consume_file_mock.call_args
         input_doc, overrides = args
 
-        input_doc: ConsumeDocument = ConsumeDocument.from_dict(input_doc)
-        overrides: DocumentOverrides = DocumentOverrides.from_dict(overrides)
+        input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
+        overrides: DocumentMetadataOverrides = DocumentMetadataOverrides.from_dict(
+            overrides,
+        )
 
         return (input_doc, overrides)
 
     def get_all_consume_delay_call_args(
         self,
-    ) -> Iterator[Tuple[ConsumeDocument, DocumentOverrides]]:
+    ) -> Iterator[Tuple[ConsumableDocument, DocumentMetadataOverrides]]:
         """
         Iterates over all calls to the async task and returns the arguments
         """
 
         for args, _ in self.consume_file_mock.call_args_list:
             input_doc, overrides = args
-            input_doc: ConsumeDocument = ConsumeDocument.from_dict(input_doc)
-            overrides: DocumentOverrides = DocumentOverrides.from_dict(overrides)
+            input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
+            overrides: DocumentMetadataOverrides = DocumentMetadataOverrides.from_dict(
+                overrides,
+            )
 
             yield (input_doc, overrides)
 
     def get_specific_consume_delay_call_args(
         self,
         index: int,
-    ) -> Iterator[Tuple[ConsumeDocument, DocumentOverrides]]:
+    ) -> Iterator[Tuple[ConsumableDocument, DocumentMetadataOverrides]]:
         """
         Returns the arguments of a specific call to the async task
         """
@@ -178,8 +182,10 @@ class DocumentConsumeDelayMixin:
         args, _ = self.consume_file_mock.call_args_list[index]
         input_doc, overrides = args
 
-        input_doc: ConsumeDocument = ConsumeDocument.from_dict(input_doc)
-        overrides: DocumentOverrides = DocumentOverrides.from_dict(overrides)
+        input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
+        overrides: DocumentMetadataOverrides = DocumentMetadataOverrides.from_dict(
+            overrides,
+        )
 
         return (input_doc, overrides)
 

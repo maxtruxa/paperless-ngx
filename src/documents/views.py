@@ -62,8 +62,8 @@ from .bulk_download import ArchiveOnlyStrategy
 from .bulk_download import OriginalAndArchiveStrategy
 from .bulk_download import OriginalsOnlyStrategy
 from .classifier import load_classifier
-from .data_models import ConsumeDocument
-from .data_models import DocumentOverrides
+from .data_models import ConsumableDocument
+from .data_models import DocumentMetadataOverrides
 from .data_models import DocumentSource
 from .filters import CorrespondentFilterSet
 from .filters import DocumentFilterSet
@@ -686,16 +686,19 @@ class PostDocumentView(GenericAPIView):
 
         os.utime(temp_file_path, times=(t, t))
 
-        input_doc = ConsumeDocument(DocumentSource.ApiUpload, temp_file_path)
-        input_doc_overrides = DocumentOverrides(
-            doc_name,
-            title,
-            correspondent_id,
-            document_type_id,
-            tag_ids,
-            created,
-            archive_serial_number,
-            request.user.id,
+        input_doc = ConsumableDocument(
+            source=DocumentSource.API_UPLOAD,
+            original_file=temp_file_path,
+        )
+        input_doc_overrides = DocumentMetadataOverrides(
+            filename=doc_name,
+            title=title,
+            correspondent_id=correspondent_id,
+            document_type_id=document_type_id,
+            tag_ids=tag_ids,
+            created=created,
+            asn=archive_serial_number,
+            owner_id=request.user.id,
         )
 
         async_task = consume_file.delay(

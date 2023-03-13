@@ -44,8 +44,8 @@ class TestTaskSignalHandler(DirectoriesMixin, TestCase):
             # args
             (
                 ConsumableDocument(
-                    DocumentSource.CONSUME_FOLDER,
-                    "/consume/hello-999.pdf",
+                    source=DocumentSource.CONSUME_FOLDER,
+                    original_file="/consume/hello-999.pdf",
                 ),
                 None,
             ),
@@ -84,8 +84,8 @@ class TestTaskSignalHandler(DirectoriesMixin, TestCase):
             # args
             (
                 ConsumableDocument(
-                    DocumentSource.CONSUME_FOLDER,
-                    "/consume/hello-99.pdf",
+                    source=DocumentSource.CONSUME_FOLDER,
+                    original_file="/consume/hello-99.pdf",
                 ),
                 None,
             ),
@@ -123,8 +123,8 @@ class TestTaskSignalHandler(DirectoriesMixin, TestCase):
             # args
             (
                 ConsumableDocument(
-                    DocumentSource.CONSUME_FOLDER,
-                    "/consume/hello-9.pdf",
+                    source=DocumentSource.CONSUME_FOLDER,
+                    original_file="/consume/hello-9.pdf",
                 ),
                 None,
             ),

@@ -45,7 +45,7 @@ class ConsumableDocument:
 
     source: DocumentSource
     original_file: Path
-    mime_type: Optional[str] = None
+    mime_type: Optional[str] = dataclasses.field(init=False, default=None)
 
     def __post_init__(self):
         """
@@ -57,6 +57,6 @@ class ConsumableDocument:
         # Just in case, convert to a path if it's a str
         self.original_file = Path(self.original_file).resolve()
 
-        # Get the file type once at init, not when from serialized
-        if self.mime_type is None:
-            self.mime_type = magic.from_file(self.original_file, mime=True)
+        # Get the file type once at init
+        # Note this function isn't called when the object is unpickled
+        self.mime_type = magic.from_file(self.original_file, mime=True)

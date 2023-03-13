@@ -146,11 +146,6 @@ class DocumentConsumeDelayMixin:
         args, _ = self.consume_file_mock.call_args
         input_doc, overrides = args
 
-        input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
-        overrides: DocumentMetadataOverrides = DocumentMetadataOverrides.from_dict(
-            overrides,
-        )
-
         return (input_doc, overrides)
 
     def get_all_consume_delay_call_args(
@@ -162,10 +157,6 @@ class DocumentConsumeDelayMixin:
 
         for args, _ in self.consume_file_mock.call_args_list:
             input_doc, overrides = args
-            input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
-            overrides: DocumentMetadataOverrides = DocumentMetadataOverrides.from_dict(
-                overrides,
-            )
 
             yield (input_doc, overrides)
 
@@ -181,11 +172,6 @@ class DocumentConsumeDelayMixin:
 
         args, _ = self.consume_file_mock.call_args_list[index]
         input_doc, overrides = args
-
-        input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
-        overrides: DocumentMetadataOverrides = DocumentMetadataOverrides.from_dict(
-            overrides,
-        )
 
         return (input_doc, overrides)
 

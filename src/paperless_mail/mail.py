@@ -710,8 +710,8 @@ class MailAccountHandler(LoggingMixin):
                 )
 
                 consume_task = consume_file.s(
-                    input_doc.as_dict(),
-                    doc_overrides.as_dict(),
+                    input_doc,
+                    doc_overrides,
                 )
 
                 consume_tasks.append(consume_task)
@@ -790,8 +790,8 @@ class MailAccountHandler(LoggingMixin):
         )
 
         consume_task = consume_file.s(
-            input_doc.as_dict(),
-            doc_overrides.as_dict(),
+            input_doc,
+            doc_overrides,
         )
 
         queue_consumption_tasks(

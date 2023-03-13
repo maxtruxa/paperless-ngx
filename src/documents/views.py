@@ -702,8 +702,8 @@ class PostDocumentView(GenericAPIView):
         )
 
         async_task = consume_file.delay(
-            input_doc.as_dict(),
-            input_doc_overrides.as_dict(),
+            input_doc,
+            input_doc_overrides,
         )
 
         return Response(async_task.id)

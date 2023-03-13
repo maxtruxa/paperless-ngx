@@ -1,14 +1,11 @@
 import dataclasses
 import datetime
 import enum
-import hashlib
 from pathlib import Path
-from typing import Dict
 from typing import List
 from typing import Optional
 
 import magic
-from dateutil.parser import isoparse
 
 
 @dataclasses.dataclass
@@ -27,33 +24,6 @@ class DocumentMetadataOverrides:
     created: Optional[datetime.datetime] = None
     asn: Optional[int] = None
     owner_id: Optional[int] = None
-
-    def as_dict(self) -> Dict:
-        return {
-            "filename": self.filename,
-            "title": self.title,
-            "correspondent_id": self.correspondent_id,
-            "document_type_id": self.document_type_id,
-            "archive_serial_num": self.asn,
-            "tag_ids": self.tag_ids,
-            "created": self.created.isoformat() if self.created else None,
-            "owner_id": self.owner_id,
-        }
-
-    @staticmethod
-    def from_dict(data: Optional[Dict]) -> "DocumentMetadataOverrides":
-        if data is None:
-            return DocumentMetadataOverrides()
-        return DocumentMetadataOverrides(
-            filename=data["filename"],
-            title=data["title"],
-            correspondent_id=data["correspondent_id"],
-            document_type_id=data["document_type_id"],
-            tag_ids=data["tag_ids"],
-            created=isoparse(data["created"]) if data["created"] else None,
-            asn=data["archive_serial_num"],
-            owner_id=data["owner_id"],
-        )
 
 
 class DocumentSource(enum.IntEnum):
@@ -81,45 +51,12 @@ class ConsumableDocument:
         """
         After a dataclass is initialized, this is called to finalize some data
         1. Make sure the original path is an absolute, fully qualified path
-        2. If not already set, get the mime type of the file
-        3. If the document is from the consume folder, create a shadow copy
-           of the file in scratch to work with
+        2. Get the mime type of the file
         """
         # Always fully qualify the path first thing
+        # Just in case, convert to a path if it's a str
         self.original_file = Path(self.original_file).resolve()
 
         # Get the file type once at init, not when from serialized
         if self.mime_type is None:
             self.mime_type = magic.from_file(self.original_file, mime=True)
-
-    @property
-    def checksum(self) -> str:
-        """
-        Returns the MD5 hash hex digest of the file
-        """
-        return hashlib.md5(self.path.read_bytes()).hexdigest()
-
-    def as_dict(self) -> Dict:
-        """
-        Serializes the dataclass into a dictionary of only basic types like
-        strings and ints
-        """
-        return {
-            "source": int(self.source),
-            "original_file": str(self.original_file),
-            "mime_type": self.mime_type,
-        }
-
-    @staticmethod
-    def from_dict(data: Dict) -> "ConsumableDocument":
-        """
-        Given a serialized dataclass, returns the
-        """
-        doc = ConsumableDocument(
-            source=DocumentSource(data["source"]),
-            original_file=Path(data["original_file"]),
-            # The mime type is already determined in this case,
-            # don't gather a second time
-            mime_type=data["mime_type"],
-        )
-        return doc

@@ -83,15 +83,9 @@ class ConsumerThreadMixin(DocumentConsumeDelayMixin):
     # completeness and raise an exception otherwise.
     def bogus_task(
         self,
-        input_doc,
+        input_doc: ConsumableDocument,
         overrides=None,
     ):
-        input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
-        overrides: DocumentMetadataOverrides = (
-            DocumentMetadataOverrides.from_dict(overrides)
-            if overrides
-            else DocumentMetadataOverrides()
-        )
         eq = filecmp.cmp(input_doc.original_file, self.sample_file, shallow=False)
         if not eq:
             print("Consumed an INVALID file.")

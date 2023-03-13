@@ -1104,10 +1104,6 @@ class TestMail(
                 expected_signatures,
             ):
                 input_doc, overrides = consume_task.args
-                input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
-                overrides: DocumentMetadataOverrides = (
-                    DocumentMetadataOverrides.from_dict(overrides)
-                )
 
                 # assert the file exists
                 self.assertIsFile(input_doc.original_file)

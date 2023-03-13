@@ -639,7 +639,7 @@ class TestBarcode(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
                     ConsumableDocument(
                         source=DocumentSource.CONSUME_FOLDER,
                         original_file=dst,
-                    ).as_dict(),
+                    ),
                     None,
                 ),
                 "File successfully split",
@@ -669,7 +669,7 @@ class TestBarcode(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
                     ConsumableDocument(
                         source=DocumentSource.CONSUME_FOLDER,
                         original_file=dst,
-                    ).as_dict(),
+                    ),
                     None,
                 ),
                 "File successfully split",
@@ -703,7 +703,7 @@ class TestBarcode(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
                     ConsumableDocument(
                         source=DocumentSource.CONSUME_FOLDER,
                         original_file=dst,
-                    ).as_dict(),
+                    ),
                     None,
                 ),
             )
@@ -748,7 +748,7 @@ class TestBarcode(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
                     ConsumableDocument(
                         source=DocumentSource.CONSUME_FOLDER,
                         original_file=dst,
-                    ).as_dict(),
+                    ),
                     None,
                 ),
                 "File successfully split",
@@ -978,7 +978,7 @@ class TestAsnBarcode(DirectoriesMixin, TestCase):
                 ConsumableDocument(
                     source=DocumentSource.CONSUME_FOLDER,
                     original_file=dst,
-                ).as_dict(),
+                ),
                 None,
             )
 
@@ -1054,4 +1054,4 @@ class TestAsnBarcode(DirectoriesMixin, TestCase):
                 ConsumerError,
                 "Given ASN 4294967296 is out of range [0, 4,294,967,295]",
             ):
-                tasks.consume_file(input_doc.as_dict())
+                tasks.consume_file(input_doc)

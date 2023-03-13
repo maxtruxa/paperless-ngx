@@ -2,7 +2,6 @@ import hashlib
 import logging
 import shutil
 import uuid
-from typing import Dict
 from typing import Optional
 from typing import Type
 
@@ -89,15 +88,13 @@ def train_classifier():
 
 @shared_task
 def consume_file(
-    input_doc: Dict,
-    overrides: Optional[Dict] = None,
+    input_doc: ConsumableDocument,
+    overrides: Optional[DocumentMetadataOverrides] = None,
 ):
 
-    # Deserialize from the basic types dict back to an object with nice types
-    input_doc: ConsumableDocument = ConsumableDocument.from_dict(input_doc)
-    overrides: DocumentMetadataOverrides = DocumentMetadataOverrides.from_dict(
-        overrides,
-    )
+    # Default no overrides
+    if overrides is None:
+        overrides = DocumentMetadataOverrides()
 
     # read all barcodes in the current document
     if settings.CONSUMER_ENABLE_BARCODES or settings.CONSUMER_ENABLE_ASN_BARCODE:

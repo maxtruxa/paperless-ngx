@@ -128,8 +128,8 @@ def _consume(filepath: str) -> None:
             ConsumableDocument(
                 source=DocumentSource.CONSUME_FOLDER,
                 original_file=filepath,
-            ).as_dict(),
-            DocumentMetadataOverrides(tag_ids=tag_ids).as_dict(),
+            ),
+            DocumentMetadataOverrides(tag_ids=tag_ids),
         )
     except Exception:
         # Catch all so that the consumer won't crash.
